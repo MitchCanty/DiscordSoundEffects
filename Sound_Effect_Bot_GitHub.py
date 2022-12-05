@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jun 23 10:49:42 2022
+Created on Mon Dec  5 09:33:08 2022
 
-@author: Mitchell
+@author: Mitchell.Canty
 """
 
 import nest_asyncio
 nest_asyncio.apply()
 
 import asyncio, discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 ffmpeg_options = {'options': '-vn'}
 
@@ -20,6 +20,15 @@ def SESource(x):
 class Sound_Effect(commands.Cog):
     def __init__self(self, bot):
         self.bot = bot
+        self.idle_time = 0
+        self.timeout.start()
+        
+    @tasks.loop(seconds = 1.0)
+    async def timeout(self, ctx):
+        if self.idle_time >= 300:
+            ctx.voice_client.disconnect()
+        else:
+            self.idle_time +=1
     
     
     @commands.command()
@@ -38,14 +47,19 @@ class Sound_Effect(commands.Cog):
         
         await channel.connect()
             
+        
+        
     @commands.command()
     @commands.cooldown(1,10,commands.BucketType.guild)
     async def play(self, ctx, *, query):
         """Plays a file from the local filesystem"""
+        self.timeout.stop()
 
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(SESource(query)))
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-
+        
+        self.idle_time = 0
+        self.timeout.start()
         #await ctx.send('Now playing: {}'.format(query))
         
 
@@ -85,6 +99,8 @@ async def on_ready():
     print('Logged in as {0} ({0.id})'.format(bot.user))
     print('------')
     await bot.get_channel(channel).send('Send a login message to a specified channel')
+    
+    
 
 bot.add_cog(Sound_Effect(bot))
     
