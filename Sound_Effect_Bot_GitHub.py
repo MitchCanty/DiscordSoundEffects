@@ -131,5 +131,5 @@ async def on_ready():
 
 bot.add_cog(Sound_Effect(bot))
     
-MCantyBot_Token = 'OTg2MzI1NDY2NDMwNDM5NTM1.G2SDs-.W8w1ZcX-VCX2Z9fF_TmPOQlqk19A5hLgPjcQuU'
-bot.run(MCantyBot_Token)
+
+bot.run(Token)
